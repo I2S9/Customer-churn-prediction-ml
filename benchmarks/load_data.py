@@ -6,6 +6,7 @@ bulk loading. Database connection is configured via environment variables.
 
 import os
 import sys
+import io
 import argparse
 from pathlib import Path
 import psycopg2
@@ -114,17 +115,21 @@ def truncate_table(conn, table_name):
 def load_table_copy(conn, table_name, csv_path, columns):
     """Load data from CSV into table using COPY."""
     with conn.cursor() as cur:
+        # Read file and skip header
         with open(csv_path, "r", encoding="utf-8") as f:
-            # Skip header line
-            next(f)
-            # Use copy_expert for full control
-            columns_str = ", ".join(columns)
-            copy_sql = f"""
-                COPY {table_name} ({columns_str})
-                FROM STDIN
-                WITH (FORMAT CSV, HEADER false, DELIMITER ',')
-            """
-            cur.copy_expert(copy_sql, f)
+            lines = f.readlines()
+            # Skip first line (header)
+            data_lines = "".join(lines[1:])
+
+        # Use copy_expert with StringIO for the data (without header)
+        data_stream = io.StringIO(data_lines)
+        columns_str = ", ".join(columns)
+        copy_sql = f"""
+            COPY {table_name} ({columns_str})
+            FROM STDIN
+            WITH (FORMAT CSV, HEADER false, DELIMITER ',')
+        """
+        cur.copy_expert(copy_sql, data_stream)
         rowcount = cur.rowcount
     conn.commit()
     return rowcount
