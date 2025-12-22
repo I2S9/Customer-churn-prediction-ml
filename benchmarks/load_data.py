@@ -10,7 +10,6 @@ import io
 import argparse
 from pathlib import Path
 import psycopg2
-from psycopg2.extras import execute_values
 
 # Default paths
 SCRIPT_DIR = Path(__file__).parent
