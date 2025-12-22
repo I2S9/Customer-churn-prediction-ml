@@ -62,11 +62,7 @@ CREATE TABLE customer_interactions (
     FOREIGN KEY (customer_id) REFERENCES customers(customer_id) ON DELETE CASCADE
 );
 
--- Indexes for common query patterns
-CREATE INDEX idx_orders_customer_id ON orders(customer_id);
-CREATE INDEX idx_orders_order_date ON orders(order_date);
-CREATE INDEX idx_order_items_order_id ON order_items(order_id);
-CREATE INDEX idx_order_items_product_id ON order_items(product_id);
-CREATE INDEX idx_customer_interactions_customer_id ON customer_interactions(customer_id);
-CREATE INDEX idx_customer_interactions_date ON customer_interactions(interaction_date);
+-- Note: Indexes are defined separately in sql/indexes.sql
+-- This schema represents the baseline state without indexes.
+-- Apply indexes using: python benchmarks/apply_indexes.py apply
 
