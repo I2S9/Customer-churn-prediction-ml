@@ -1,0 +1,62 @@
+# Benchmark Configuration
+# This file contains all parameters needed to reproduce benchmark experiments
+
+# Data generation
+data_generation:
+  seed: 42  # Fixed seed for reproducibility
+  scales:
+    small:
+      customers: 150
+      products: 25
+      orders: 400
+      interactions: 200
+    medium:
+      customers: 1500
+      products: 250
+      orders: 4000
+      interactions: 2000
+    large:
+      customers: 15000
+      products: 2500
+      orders: 40000
+      interactions: 20000
+
+# Database configuration
+database:
+  host: "localhost"
+  port: 5432
+  name: "churn_db"
+  user: "postgres"
+  password: ""  # Set via DB_PASSWORD environment variable
+
+# Benchmark parameters
+benchmarks:
+  latency:
+    warmup_runs: 2
+    measurement_runs: 10
+    scales: ["small", "medium", "large"]
+    index_states: ["no_index", "with_index"]
+  
+  throughput:
+    concurrency: 8
+    duration_seconds: 30
+    scales: ["small", "medium"]  # Large scale may take too long
+    index_states: ["no_index", "with_index"]
+  
+  explain:
+    scales: ["small", "medium", "large"]
+    index_states: ["no_index", "with_index"]
+
+# Paths
+paths:
+  sql_dir: "sql"
+  data_dir: "data/raw"
+  results_dir: "results/metrics"
+  figures_dir: "results/figures"
+
+# Python and package versions (for reproducibility)
+versions:
+  python: ">=3.8"
+  psycopg2_binary: ">=2.9.0"
+  matplotlib: ">=3.5.0"
+
