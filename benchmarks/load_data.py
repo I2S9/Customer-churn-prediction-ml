@@ -25,10 +25,10 @@ DB_CONFIG = {
     "password": os.getenv("DB_PASSWORD", ""),
 }
 
-# Table definitions with column order matching CSV headers
-TABLES = {
+# Base table definitions with column order matching CSV headers
+BASE_TABLES = {
     "customers": {
-        "file": "customers.csv",
+        "base_file": "customers.csv",
         "columns": [
             "customer_id",
             "country",
@@ -40,7 +40,7 @@ TABLES = {
         ],
     },
     "products": {
-        "file": "products.csv",
+        "base_file": "products.csv",
         "columns": [
             "product_id",
             "product_name",
@@ -50,7 +50,7 @@ TABLES = {
         ],
     },
     "orders": {
-        "file": "orders.csv",
+        "base_file": "orders.csv",
         "columns": [
             "order_id",
             "customer_id",
@@ -61,7 +61,7 @@ TABLES = {
         ],
     },
     "order_items": {
-        "file": "order_items.csv",
+        "base_file": "order_items.csv",
         "columns": [
             "order_item_id",
             "order_id",
@@ -71,7 +71,7 @@ TABLES = {
         ],
     },
     "customer_interactions": {
-        "file": "customer_interactions.csv",
+        "base_file": "customer_interactions.csv",
         "columns": [
             "interaction_id",
             "customer_id",
@@ -82,6 +82,26 @@ TABLES = {
         ],
     },
 }
+
+
+def get_tables_for_scale(scale):
+    """Get table definitions with scale-specific filenames."""
+    tables = {}
+    for table_name, table_def in BASE_TABLES.items():
+        base_file = table_def["base_file"]
+        # Add scale suffix before .csv extension
+        if scale:
+            base_name = base_file.replace(".csv", "")
+            filename = f"{base_name}_{scale}.csv"
+        else:
+            # Fallback to base file if no scale specified
+            filename = base_file
+        
+        tables[table_name] = {
+            "file": filename,
+            "columns": table_def["columns"],
+        }
+    return tables
 
 # Load order respecting foreign key constraints
 LOAD_ORDER = [
@@ -222,13 +242,16 @@ def main():
         sys.exit(1)
     print("Schema verified")
 
+    # Get tables with scale-specific filenames
+    tables = get_tables_for_scale(args.scale)
+    
     # Load tables in correct order
     print(f"\nLoading data (scale: {args.scale})...")
     total_rows = 0
 
     try:
         for table_name in LOAD_ORDER:
-            table_config = TABLES[table_name]
+            table_config = tables[table_name]
             csv_path = args.data_dir / table_config["file"]
 
             rowcount = load_table(

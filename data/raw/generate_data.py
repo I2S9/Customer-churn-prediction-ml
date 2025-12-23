@@ -6,6 +6,7 @@ All random operations use a fixed seed for reproducibility.
 
 import random
 import csv
+import argparse
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -16,11 +17,27 @@ random.seed(42)
 OUTPUT_DIR = Path(__file__).parent
 DATA_DIR = OUTPUT_DIR
 
-# Dataset size parameters (small dataset)
-N_CUSTOMERS = 150
-N_PRODUCTS = 25
-N_ORDERS = 400
-N_INTERACTIONS = 200
+# Dataset size parameters by scale
+SCALE_PARAMS = {
+    "small": {
+        "customers": 150,
+        "products": 25,
+        "orders": 400,
+        "interactions": 200,
+    },
+    "medium": {
+        "customers": 1500,
+        "products": 250,
+        "orders": 4000,
+        "interactions": 2000,
+    },
+    "large": {
+        "customers": 15000,
+        "products": 2500,
+        "orders": 40000,
+        "interactions": 20000,
+    },
+}
 
 # Data generation constants
 COUNTRIES = ["USA", "UK", "France", "Germany", "Canada", "Australia", "Spain", "Italy"]
@@ -165,8 +182,13 @@ def generate_interactions(n_interactions, n_customers):
     return interactions
 
 
-def write_csv(data, filename, fieldnames):
+def write_csv(data, filename, fieldnames, scale_suffix=""):
     """Write data to CSV file."""
+    if scale_suffix:
+        # Add scale suffix before .csv extension
+        base_name = filename.replace(".csv", "")
+        filename = f"{base_name}_{scale_suffix}.csv"
+    
     filepath = DATA_DIR / filename
     with open(filepath, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -177,51 +199,86 @@ def write_csv(data, filename, fieldnames):
 
 def main():
     """Generate all synthetic datasets."""
-    print("Generating synthetic customer churn dataset...")
+    parser = argparse.ArgumentParser(
+        description="Generate synthetic customer churn prediction dataset"
+    )
+    parser.add_argument(
+        "--scale",
+        choices=["small", "medium", "large"],
+        default="small",
+        help="Dataset scale to generate (default: small)",
+    )
+    args = parser.parse_args()
+    
+    # Get scale parameters
+    params = SCALE_PARAMS[args.scale]
+    n_customers = params["customers"]
+    n_products = params["products"]
+    n_orders = params["orders"]
+    n_interactions = params["interactions"]
+    
+    print("=" * 60)
+    print("Synthetic Customer Churn Dataset Generator")
+    print("=" * 60)
+    print(f"Scale: {args.scale}")
     print(f"Seed: 42 (fixed for reproducibility)")
-    print("-" * 50)
+    print(f"Customers: {n_customers}")
+    print(f"Products: {n_products}")
+    print(f"Orders: {n_orders}")
+    print(f"Interactions: {n_interactions}")
+    print("-" * 60)
     
     # Generate data
-    customers = generate_customers(N_CUSTOMERS)
-    products = generate_products(N_PRODUCTS)
-    orders = generate_orders(N_ORDERS, N_CUSTOMERS, products)
-    interactions = generate_interactions(N_INTERACTIONS, N_CUSTOMERS)
+    print("\nGenerating data...")
+    customers = generate_customers(n_customers)
+    products = generate_products(n_products)
+    orders = generate_orders(n_orders, n_customers, products)
+    interactions = generate_interactions(n_interactions, n_customers)
     
     # Extract order items from orders
     order_items = []
     for order in orders:
         order_items.extend(order.pop("_items", []))
     
-    # Write CSV files
+    # Write CSV files with scale suffix
+    print("\nWriting CSV files...")
     write_csv(
         customers,
         "customers.csv",
         ["customer_id", "country", "created_at", "email", "age", "gender", "registration_channel"],
+        scale_suffix=args.scale,
     )
     write_csv(
         products,
         "products.csv",
         ["product_id", "product_name", "category", "price", "created_at"],
+        scale_suffix=args.scale,
     )
     write_csv(
         orders,
         "orders.csv",
         ["order_id", "customer_id", "order_date", "total_amount", "status", "payment_method"],
+        scale_suffix=args.scale,
     )
     write_csv(
         order_items,
         "order_items.csv",
         ["order_item_id", "order_id", "product_id", "quantity", "unit_price"],
+        scale_suffix=args.scale,
     )
     write_csv(
         interactions,
         "customer_interactions.csv",
         ["interaction_id", "customer_id", "interaction_type", "interaction_date", "channel", "outcome"],
+        scale_suffix=args.scale,
     )
     
-    print("-" * 50)
+    print("-" * 60)
     print("Dataset generation complete!")
-    print(f"Total records: {len(customers) + len(products) + len(orders) + len(order_items) + len(interactions)}")
+    total_records = len(customers) + len(products) + len(orders) + len(order_items) + len(interactions)
+    print(f"Total records: {total_records:,}")
+    print(f"Files saved with suffix: _{args.scale}")
+    print("=" * 60)
 
 
 if __name__ == "__main__":
