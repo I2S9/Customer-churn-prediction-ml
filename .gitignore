@@ -55,6 +55,8 @@ data/processed/*
 *.pickle
 *.h5
 *.hdf5
+*.duckdb
+*.duckdb.wal
 
 # Model artifacts
 models/*.pkl
