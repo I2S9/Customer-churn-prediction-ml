@@ -19,22 +19,36 @@ from src.models.train_tree import (
     main as tree_main,
     train_tree_model,
 )
+from src.models.tune import (
+    create_pipeline,
+    get_param_grid,
+    main as tune_main,
+    save_tuned_model,
+    save_tuning_summary,
+    tune_model,
+)
 
 __all__ = [
     "baseline_main",
     "compare_models",
     "create_baseline_pipeline",
     "create_lightgbm_pipeline",
+    "create_pipeline",
     "create_random_forest_pipeline",
     "create_xgboost_pipeline",
     "evaluate_model",
     "generate_tree_report",
+    "get_param_grid",
     "load_features",
     "prepare_features",
     "save_model",
+    "save_tuned_model",
+    "save_tuning_summary",
     "temporal_split",
     "train_baseline",
     "train_tree_model",
     "tree_main",
+    "tune_main",
+    "tune_model",
 ]
 
