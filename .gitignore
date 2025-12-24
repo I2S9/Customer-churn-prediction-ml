@@ -47,7 +47,6 @@ venv.bak/
 # Data files
 data/raw/*
 !data/raw/.gitkeep
-!data/raw/*.py
 data/processed/*
 !data/processed/.gitkeep
 *.csv
