@@ -537,15 +537,9 @@ def main(
     output_dir : str, optional
         Directory to save outputs.
     """
-    # This is a placeholder - in practice, you would load from model predictions
     logger.info("Threshold analysis module loaded. Use perform_threshold_analysis() function.")
 
 
 if __name__ == "__main__":
-    import sys
-
-    cost_fp = float(sys.argv[1]) if len(sys.argv) > 1 else 1.0
-    cost_fn = float(sys.argv[2]) if len(sys.argv) > 2 else 5.0
-
     logger.info("Threshold analysis module loaded. Use perform_threshold_analysis() function.")
 

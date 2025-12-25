@@ -357,8 +357,5 @@ def main(
 
 
 if __name__ == "__main__":
-    import sys
-
-    # This is a placeholder - in practice, metrics would be calculated from model predictions
     logger.info("Metrics module loaded. Use evaluate_model() or main() functions.")
 

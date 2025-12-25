@@ -536,11 +536,5 @@ def main(
 
 
 if __name__ == "__main__":
-    import sys
-
-    retention_cost = float(sys.argv[1]) if len(sys.argv) > 1 else 10.0
-    churn_loss = float(sys.argv[2]) if len(sys.argv) > 2 else 100.0
-    budget = float(sys.argv[3]) if len(sys.argv) > 3 and sys.argv[3] != "None" else None
-
     logger.info("Business evaluation module loaded. Use perform_business_evaluation() function.")
 
