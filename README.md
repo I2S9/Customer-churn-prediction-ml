@@ -125,6 +125,92 @@ View comprehensive results in the summary notebook:
 jupyter notebook notebooks/01_results_summary.ipynb
 ```
 
+## Decision Framing
+
+The pipeline supports decision-making under business constraints:
+
+### Threshold Selection
+
+Classification threshold is optimized based on business costs:
+- **False Positive Cost**: Cost of unnecessary retention intervention
+- **False Negative Cost**: Cost of missed churn (lost customer value)
+- **Optimal Threshold**: Minimizes total cost: `cost_fp × FP + cost_fn × FN`
+
+### Budget Constraints
+
+The system can find the best threshold under budget limitations:
+- Maximum intervention budget
+- ROI calculation for each strategy
+- Comparison with baseline (no intervention)
+
+### Business Impact
+
+Results include:
+- Net gain estimation vs baseline
+- ROI calculation
+- Intervention volume and cost
+- Prevented churns
+
+## Limitations
+
+### Data Bias
+
+- **Temporal bias**: Model trained on historical data may not generalize to future patterns
+- **Selection bias**: Only customers with sufficient activity are included
+- **Label bias**: Churn definition (30-day inactivity) may not capture all churn types
+
+### Label Definition
+
+- Churn is defined as 30 days of inactivity after 90-day observation window
+- Customers with no events during observation are excluded
+- Historical churns (before observation window) are excluded
+- This definition may not align with all business contexts
+
+### Leakage Risks
+
+- Features are computed only from data before the observation date
+- Manual review recommended to ensure no future information leakage
+- Temporal ordering is enforced in train/validation/test splits
+- Feature validation checks for suspicious correlations
+
+### Model Assumptions
+
+- Stationarity assumption: customer behavior patterns remain stable
+- Linearity assumption (baseline model): Logistic regression assumes linear relationships
+- Independence assumption: Customer behaviors are treated as independent
+
+## Next Steps
+
+### Production Deployment
+
+1. **Online A/B Testing**: Deploy model to production with controlled experiments
+   - Test intervention strategies on random customer subsets
+   - Measure actual retention rates vs predicted
+   - Compare treatment vs control groups
+
+2. **Model Monitoring**: Set up continuous monitoring
+   - Track prediction distributions over time
+   - Monitor feature drift
+   - Alert on performance degradation
+
+3. **Feedback Loop**: Incorporate production feedback
+   - Collect actual churn outcomes
+   - Retrain model with new data periodically
+   - Update feature engineering based on new patterns
+
+### Model Improvements
+
+- **Feature Engineering**: Add domain-specific features based on error analysis
+- **Ensemble Methods**: Combine multiple models for robustness
+- **Online Learning**: Adapt model to changing customer behavior patterns
+- **Causal Inference**: Understand intervention effectiveness beyond correlation
+
+### Business Integration
+
+- **Real-time Scoring**: Deploy model for real-time churn prediction
+- **Intervention Automation**: Automate retention campaigns based on predictions
+- **ROI Tracking**: Measure actual ROI of interventions in production
+
 ## Testing
 
 Run tests to verify pipeline components:
