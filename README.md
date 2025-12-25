@@ -2,18 +2,38 @@
 
 > End-to-end machine learning pipeline for predicting customer churn using historical behavioral data. This project demonstrates professional data science practices with a focus on scalability, business metrics, and actionable insights rather than academic experimentation.
 
-## Problem Statement
+## What This Project Does
 
-Customer churn represents a significant business challenge. This project predicts which customers are likely to churn within a 30-day window after a 90-day observation period, enabling proactive retention interventions. The solution emphasizes decision-making under business constraints, with cost-benefit analysis and threshold optimization to maximize return on investment.
+**Problem**: Customer churn (customers leaving) is expensive for businesses. Identifying at-risk customers early allows proactive retention efforts.
 
-## Data Description
+**Solution**: This pipeline predicts which customers are likely to churn within 30 days, based on their behavior over the previous 90 days. It provides:
+- Churn probability scores
+- Recommended actions (intervene, monitor, or no action)
+- Business impact analysis (ROI, cost-benefit)
 
-The pipeline processes customer behavioral data including:
-- **Customer profiles**: signup date, country, plan type, monthly revenue
-- **Event data**: timestamped customer interactions (purchases, logins, page views) with values
-- **Features**: RFM metrics (Recency, Frequency, Monetary), temporal patterns, and event-type aggregates
+**Why It Matters**: Instead of treating all customers equally, this helps focus retention efforts on high-risk customers where interventions are most cost-effective.
 
-Data flows through: `raw data` → `staging` → `feature engineering (SQL)` → `modeling` → `evaluation`
+## Data Requirements
+
+The pipeline expects customer behavioral data with:
+
+**Customer Information**:
+- Customer ID, signup date, country, plan type, monthly revenue
+
+**Event History**:
+- Timestamped events (purchases, logins, page views, etc.)
+- Event values (transaction amounts, etc.)
+
+**How It Works**:
+1. Raw data is loaded and validated
+2. Features are computed using SQL (DuckDB) - including:
+   - **RFM metrics**: Recency (days since last activity), Frequency (event counts), Monetary (total spending)
+   - **Temporal patterns**: Event trends over 7/30/90 day windows
+   - **Customer profile**: Tenure, plan type, etc.
+3. Models are trained to predict churn probability
+4. Results include business recommendations and ROI analysis
+
+**Note**: You need to provide your own customer data in `data/raw/` directory (CSV or Parquet format).
 
 ## Setup
 
@@ -25,7 +45,7 @@ Data flows through: `raw data` → `staging` → `feature engineering (SQL)` →
 ### Installation
 
 ```bash
-# Clone the repository
+# Clone the repository (replace with your actual repository URL)
 git clone <repository-url>
 cd Customer-churn-prediction-ml
 
@@ -33,17 +53,32 @@ cd Customer-churn-prediction-ml
 pip install -e ".[dev]"
 ```
 
-## Run Pipeline
+**What this installs**:
+- Core dependencies: pandas, scikit-learn, numpy, duckdb
+- Optional API: fastapi, uvicorn (for inference API)
+- Development tools: pytest, black, ruff (for code quality)
 
-### Quick Start
+## Quick Start
 
-Run the complete pipeline from raw data to evaluation:
+**Before running**: Place your customer data file (CSV or Parquet) in `data/raw/` directory.
+
+**Run the complete pipeline** (from raw data to evaluation):
 
 ```bash
 python -m src.cli full-run --model-type baseline
 ```
 
-### Step-by-Step
+This will:
+1. Load and validate your raw data
+2. Compute features using SQL
+3. Train a baseline model (Logistic Regression)
+4. Evaluate the model and generate reports in `reports/`
+
+**View results**: Open `notebooks/01_results_summary.ipynb` to see visualizations and summaries.
+
+## Step-by-Step Usage
+
+If you prefer to run steps individually:
 
 ```bash
 # 1. Generate features from raw data
@@ -52,25 +87,32 @@ python -m src.cli make-features --raw-file data/raw/your_data.csv
 # 2. Train a baseline model
 python -m src.cli train --model-type baseline
 
-# 3. Train a tree-based model (RandomForest)
+# 3. Train a tree-based model (RandomForest - usually better performance)
 python -m src.cli train --model-type random_forest
 
-# 4. Evaluate model (metrics, thresholds, business, errors)
+# 4. Evaluate model (generates metrics, threshold analysis, business evaluation, error analysis)
 python -m src.cli evaluate \
     --model-path models/baseline.pkl \
     --metrics --thresholds --business --errors
 
-# 5. Hyperparameter tuning
+# 5. Optional: Hyperparameter tuning (improves model performance)
 python -m src.cli tune --model-type random_forest --n-iter 30
 ```
 
-### CLI Commands
+### Available Commands
 
-- `make-features`: Load raw data, compute features via SQL, validate
-- `train`: Train baseline or tree-based models (RandomForest/XGBoost/LightGBM)
-- `tune`: Hyperparameter tuning with RandomizedSearchCV (controlled budget)
-- `evaluate`: Comprehensive evaluation (metrics, thresholds, business, errors)
-- `full-run`: Execute complete pipeline end-to-end
+- **`make-features`**: Load raw data, compute features using SQL (DuckDB), validate for data quality
+- **`train`**: Train models - choose from:
+  - `baseline`: Logistic Regression (fast, interpretable)
+  - `random_forest`: Random Forest (better performance, default)
+  - `xgboost` or `lightgbm`: Gradient boosting (best performance, slower)
+- **`tune`**: Optimize model hyperparameters (improves accuracy, takes longer)
+- **`evaluate`**: Comprehensive evaluation including:
+  - Classification metrics (accuracy, precision, recall)
+  - Threshold optimization (find best decision threshold)
+  - Business impact (ROI, cost-benefit analysis)
+  - Error analysis (identify failure modes)
+- **`full-run`**: Execute complete pipeline end-to-end (recommended for first run)
 
 ## Metrics
 
