@@ -211,6 +211,24 @@ Results include:
 - **Intervention Automation**: Automate retention campaigns based on predictions
 - **ROI Tracking**: Measure actual ROI of interventions in production
 
+## API Inference (Optional)
+
+A simple FastAPI service is available for real-time predictions:
+
+```bash
+# Start the API server
+uvicorn src.api.app:app --host 0.0.0.0 --port 8000
+
+# API documentation available at http://localhost:8000/docs
+```
+
+The API provides:
+- `/predict`: Single customer prediction with recommended action
+- `/predict-batch`: Batch predictions for multiple customers
+- Automatic loading of optimal threshold and business parameters
+
+See `src/api/README.md` for detailed usage.
+
 ## Testing
 
 Run tests to verify pipeline components:
